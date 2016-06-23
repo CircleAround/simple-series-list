@@ -24,6 +24,8 @@ License: GPL2
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+add_filter('widget_text', 'do_shortcode' );
+
 function simple_series_list($params = array()) {
   extract(shortcode_atts(array(
     'post_type' => 'post',
