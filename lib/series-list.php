@@ -19,22 +19,17 @@ if(!class_exists('Series_List')){
 
     public function retList($ids) {
       $series_list = array();
-
-      foreach ($ids as $id) {
-        $series_list[get_permalink( $id )] = get_post( $id )->post_title;
-      }
-
       $current_url = (empty($_SERVER["HTTPS"]) ? "http://" : "https://") .
                      $_SERVER["HTTP_HOST"] .
                      $_SERVER["REQUEST_URI"];
 
       $ret_list = "<ol class='series_list'>" . "\n";
 
-      foreach ($series_list as $key => $value) {
-        if ($current_url === $key) {
-          $ret_list .= "<li>" . $value . "</li>" . "\n";
+      foreach ($ids as $id) {
+        if ($current_url === get_permalink( $id )) {
+          $ret_list .= "<li>" . get_post( $id )->post_title . "</li>" . "\n";
         } else {
-          $ret_list .= "<li><a href='" . $key . "'>" . $value . "</a></li>" . "\n";
+          $ret_list .= "<li><a href='" . get_permalink( $id ) . "'>" . get_post( $id )->post_title . "</a></li>" . "\n";
         }
       }
 
