@@ -28,14 +28,12 @@ add_filter('widget_text', 'do_shortcode' );
 
 function simple_series_list($params = array()) {
   extract(shortcode_atts(array(
-    'post_type' => 'post',
-    'order_by' => 'menu_order',
-    'sort_by' => 'ASC'
+    'post_type' => 'post'
   ), $params));
   ob_start();
   include(dirname(__file__) . "/lib/series-list.php");
-  $SeriesList = new Series_List();
-  $ids = $SeriesList->SearchIds($post_type, $SeriesList->CheckSortBy($sort_by));
+  $SeriesList = new SeriesList();
+  $ids = $SeriesList->SearchIds($post_type);
   echo $SeriesList->RetList($ids);
   return ob_get_clean();
 }

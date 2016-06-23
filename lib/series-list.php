@@ -1,20 +1,8 @@
 <?php
 if(!class_exists('Series_List')){
-  class Series_List {
+  class SeriesList {
 
-    public function CheckSortBy($sort_by){
-      $order = ['ASC', 'DESC'];
-      $is_sort_by = in_array(strtoupper($sort_by), $order);
-      return $is_sort_by ? $order[array_search(strtoupper($sort_by), $order)] : 'ASC';
-    }
-
-    public function CheckOrderBy($order_by){
-      $columns = [];
-      $is_order_by = in_array(strtolower($order_by), array_map('strtolower', $columns));
-      return $is_order_by ? $columns[array_search(strtolower($order_by), array_map('strtolower', $columns))] : 'id';
-    }
-
-    public function SearchIds($post_type, $sort_by){
+    public function searchIds($post_type){
       global $wpdb;
       $ids = $wpdb->get_col($wpdb->prepare(
           "
@@ -22,14 +10,14 @@ if(!class_exists('Series_List')){
           FROM $wpdb->posts
           WHERE post_type = %s
                 AND post_status = 'publish'
-          ORDER BY menu_order $sort_by
+          ORDER BY menu_order
           ",
           $post_type
       ));
       return $ids;
     }
 
-    public function RetList($ids) {
+    public function retList($ids) {
       $series_list = array();
 
       foreach ($ids as $id) {
