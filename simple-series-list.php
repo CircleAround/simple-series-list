@@ -41,4 +41,4 @@ function simple_series_list($params = array()) {
 }
 
 
-add_shortcode('simple_series_list', 'simple_series_list');
+add_shortcode('series_list', 'simple_series_list');
