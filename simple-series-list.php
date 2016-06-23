@@ -34,6 +34,9 @@ function simple_series_list($params = array()) {
   ), $params));
   ob_start();
   include(dirname(__file__) . "/lib/series-list.php");
+  $SeriesList = new Series_List();
+  $ids = $SeriesList->SearchIds($post_type, $SeriesList->CheckSortBy($sort_by));
+  echo $SeriesList->RetList($ids);
   return ob_get_clean();
 }
 
