@@ -31,7 +31,7 @@ function simple_series_list($params = array()) {
     'post_type' => 'post'
   ), $params));
   ob_start();
-  include(dirname(__file__) . "/lib/series-list.php");
+  include_once(dirname(__file__) . "/lib/series-list.php");
   $SeriesList = new SeriesList();
   $ids = $SeriesList->SearchIds($post_type);
   echo $SeriesList->RetList($ids);
