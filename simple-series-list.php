@@ -26,17 +26,37 @@ License: GPL2
 
 add_filter('widget_text', 'do_shortcode' );
 
+function simple_series_instance($post_type, $block) {
+  $exclude_post_types = ['post', 'page', 'attachment', 'revision', 'nav_menu_item'];
+  $post_type = get_post_type();
+  if(!$post_type || array_search($post_type, $exclude_post_types) !== FALSE) {
+    return null;
+  }
+
+  include_once(dirname(__file__) . "/lib/series-list.php");
+  return $block(SeriesList::instance($post_type));
+}
+
 function simple_series_list($params = array()) {
   extract(shortcode_atts(array(
     'post_type' => 'post'
   ), $params));
-  ob_start();
-  include_once(dirname(__file__) . "/lib/series-list.php");
-  $SeriesList = new SeriesList();
-  $ids = $SeriesList->SearchIds($post_type);
-  echo $SeriesList->RetList($ids);
-  return ob_get_clean();
+
+  return simple_series_instance($post_type, function($simpleSeries){
+    return $simpleSeries->createHtml();
+  });
 }
 
-
 add_shortcode('series_list', 'simple_series_list');
+
+function simple_series_neighbor_menu($params = array()) {
+  extract(shortcode_atts(array(
+    'post_type' => 'post'
+  ), $params));
+
+  return simple_series_instance($post_type, function($simpleSeries){
+    return $simpleSeries->createNeighborMenuHtml();
+  });
+}
+
+add_shortcode('simple_series_neighbor_menu', 'simple_series_neighbor_menu');

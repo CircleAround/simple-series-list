@@ -1,41 +1,99 @@
 <?php
-if(!class_exists('Series_List')){
+if(!class_exists('SeriesList')){
   class SeriesList {
+    private static $instance;
 
-    public function searchIds($post_type){
-      global $wpdb;
-      $ids = $wpdb->get_col($wpdb->prepare(
-          "
-          SELECT id
-          FROM $wpdb->posts
-          WHERE post_type = %s
-                AND post_status = 'publish'
-          ORDER BY menu_order
-          ",
-          $post_type
-      ));
-      return $ids;
+    public static function instance($post_type) {
+      if (!$instance) {
+        $instance = new SeriesList($post_type);
+      }
+      return $instance;
     }
 
-    public function retList($ids) {
-      $series_list = array();
-      $current_url = (empty($_SERVER["HTTPS"]) ? "http://" : "https://") .
-                     $_SERVER["HTTP_HOST"] .
-                     $_SERVER["REQUEST_URI"];
+    function SeriesList($post_type){
+      $this->post_type = $post_type;
+    }
 
-      $ret_list = "<ol class='series_list'>" . "\n";
+    public function createHtml() {
 
+      $neighborMenu = $this->createNeighborMenuHtml();
+
+      $ret_list = "<ol class='series_list'>\n";
+      $post_id = $this->getPostId();
+      $ids = $this->searchIds();
       foreach ($ids as $id) {
-        if ($current_url === get_permalink( $id )) {
-          $ret_list .= "<li>" . get_post( $id )->post_title . "</li>" . "\n";
+        if ($post_id == $id ) {
+          $ret_list .= "<li>" . get_post( $id )->post_title . "</li>\n";
         } else {
-          $ret_list .= "<li><a href='" . get_permalink( $id ) . "'>" . get_post( $id )->post_title . "</a></li>" . "\n";
+          $ret_list .= "<li><a href='" . get_permalink( $id ) . "'>" . get_post( $id )->post_title . "</a></li>\n";
         }
       }
-
       $ret_list .= "</ol>\n";
-      return $ret_list;
+      return $neighborMenu . $ret_list . $neighborMenu;
     }
 
+    public function getNeighborIds() {
+      $ids = $this->searchIds();
+      $findout = false;
+      $post_id = $this->getPostId();
+      foreach ($ids as $id) {
+        if ($findout) {
+          $next_id = $id;
+          break;
+        }
+
+        if ($post_id == $id ) {
+          $findout = true;
+        }
+
+        if (!$findout) {
+          $prev_id = $id;
+        }
+      }
+      return ['prev_id' => $prev_id, 'next_id' => $next_id];
+    }
+
+    public function createNeighborMenuHtml($prev_icon = '▲', $next_icon = '▼') {
+      $neighbors = $this->getNeighborIds();
+      $neighborMenu = '';
+      $prev_id = $neighbors['prev_id'];
+      $next_id = $neighbors['next_id'];
+
+      if($prev_id || $next_id) {
+        $neighborMenu .= '<div class="series_list_actions">';
+        if($prev_id) {
+          $link = get_permalink( $prev_id );
+          $neighborMenu .= "<a href=\"$link\">$prev_icon</a> ";
+        }
+        if($next_id) {
+          $link = get_permalink( $next_id );
+          $neighborMenu .= "<a href=\"$link\">$next_icon</a>";
+        }
+        $neighborMenu .= '</div>';
+      }
+      return $neighborMenu;
+    }
+
+    private function searchIds(){
+      if (!$this->ids) {
+        global $wpdb;
+        $this->ids = $wpdb->get_col($wpdb->prepare(
+            "
+            SELECT id
+            FROM $wpdb->posts
+            WHERE post_type = %s
+                  AND post_status = 'publish'
+            ORDER BY menu_order
+            ",
+            $this->post_type
+        ));
+      }
+      return $this->ids;
+    }
+
+    private function getPostId() {
+      global $wp_query;
+      return $wp_query->post->ID;
+    }
   }
 }
