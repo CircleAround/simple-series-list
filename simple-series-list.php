@@ -27,9 +27,8 @@ License: GPL2
 add_filter('widget_text', 'do_shortcode' );
 
 function simple_series_instance($post_type, $block) {
-  $exclude_post_types = ['post', 'page', 'attachment', 'revision', 'nav_menu_item'];
-  $post_type = get_post_type();
-  if(!$post_type || array_search($post_type, $exclude_post_types) !== FALSE) {
+  $custom_post_types = get_post_types(['public' => true, '_builtin' => false]);
+  if(!$post_type || array_search($post_type, $custom_post_types) === false) {
     return null;
   }
 
@@ -37,25 +36,31 @@ function simple_series_instance($post_type, $block) {
   return $block(SeriesList::instance($post_type));
 }
 
-function simple_series_list($params = array()) {
-  extract(shortcode_atts(array(
-    'post_type' => 'post'
-  ), $params));
+/*
+ * [series_list actions="true"] すると、メニューの上下に「次へ」「前へ」の操作アイコンが出る
+ */
+function simple_series_list_shorcode_params($params) {
+  return shortcode_atts([
+    'post_type' => get_post_type(),
+    'prev_icon' => '▲',
+    'next_icon' => '▼',
+    'actions' => false
+  ], $params);
+}
 
-  return simple_series_instance($post_type, function($simpleSeries){
-    return $simpleSeries->createHtml();
+function simple_series_list($params = array()) {
+  $params = simple_series_list_shorcode_params($params);
+  return simple_series_instance($params['post_type'], function($simpleSeries) use (&$params){
+    return $simpleSeries->createHtml($params);
   });
 }
 
 add_shortcode('series_list', 'simple_series_list');
 
 function simple_series_neighbor_menu($params = array()) {
-  extract(shortcode_atts(array(
-    'post_type' => 'post'
-  ), $params));
-
-  return simple_series_instance($post_type, function($simpleSeries){
-    return $simpleSeries->createNeighborMenuHtml();
+  $params = simple_series_list_shorcode_params($params);
+  return simple_series_instance($post_type, function($simpleSeries) use (&$params){
+    return $simpleSeries->createNeighborMenuHtml($params);
   });
 }
 

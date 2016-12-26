@@ -14,9 +14,10 @@ if(!class_exists('SeriesList')){
       $this->post_type = $post_type;
     }
 
-    public function createHtml() {
-
-      $neighborMenu = $this->createNeighborMenuHtml();
+    public function createHtml($params = []) {
+      print_r($params);
+      $neighborMenu = $this->createNeighborMenuHtml($params);
+      print_r($neighborMenu);
 
       $ret_list = "<ol class='series_list'>\n";
       $post_id = $this->getPostId();
@@ -50,14 +51,30 @@ if(!class_exists('SeriesList')){
           $prev_id = $id;
         }
       }
+      if (!$findout) {
+        return ['prev_id' => false, 'next_id' => false];
+      }
+
       return ['prev_id' => $prev_id, 'next_id' => $next_id];
     }
 
-    public function createNeighborMenuHtml($prev_icon = '▲', $next_icon = '▼') {
+    public function createNeighborMenuHtml($params = []) {
+      $params = $params + [
+        'prev_icon' => '▲',
+        'next_icon' => '▼',
+        'actions' => 0
+      ];
+
+      if (!$params['actions']) {
+        return '';
+      }
+
       $neighbors = $this->getNeighborIds();
       $neighborMenu = '';
       $prev_id = $neighbors['prev_id'];
       $next_id = $neighbors['next_id'];
+      $prev_icon = $params['prev_icon'];
+      $next_icon = $params['next_icon'];
 
       if($prev_id || $next_id) {
         $neighborMenu .= '<div class="series_list_actions">';
