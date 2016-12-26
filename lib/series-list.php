@@ -15,9 +15,7 @@ if(!class_exists('SeriesList')){
     }
 
     public function createHtml($params = []) {
-      print_r($params);
       $neighborMenu = $this->createNeighborMenuHtml($params);
-      print_r($neighborMenu);
 
       $ret_list = "<ol class='series_list'>\n";
       $post_id = $this->getPostId();
