@@ -60,7 +60,7 @@ if(!class_exists('SeriesList')){
       $params = $params + [
         'prev_icon' => '▲',
         'next_icon' => '▼',
-        'actions' => 0
+        'actions' => false
       ];
 
       if (!$params['actions']) {
